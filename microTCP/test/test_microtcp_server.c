@@ -35,14 +35,12 @@
 
 int main(int argc, char **argv)
 {
-    microtcp_header_t header;
     int data;
+    microtcp_header_t header;
     microtcp_sock_t socket;
-    int sockfd, connfd, len;
-    char buffer[MAXLINE];
     struct sockaddr_in servaddr, clientaddr;
-    void *helloser = "Hello from server.";
-    printf("listening on port 8080..\n ");
+
+    printf("Listening on port 8080..\n ");
 
     socket = microtcp_socket(AF_INET, SOCK_DGRAM, 0);
 
@@ -60,20 +58,16 @@ int main(int argc, char **argv)
     }
     microtcp_accept(&socket, (struct sockaddr *)&clientaddr, sizeof(clientaddr));
 
-
     memset(&header, 0, sizeof(header));
 
     while (data = microtcp_recv(&socket, &header, sizeof(header), MSG_WAITALL))
     {
         printf("RECEIVE: seq-> %d, ack->%d, control->%d\n", header.seq_number, header.ack_number, header.control);
     }
+    printf("GETS FIN+ACK FOR SHUTDOWN\n\n");
+    printf("1st recv server: seq_num %d and ack_num %d\nWith control: %hu\n", header.seq_number, header.ack_number, header.control);
+
     microtcp_shutdown(&socket, 1);
 
     return 0;
 }
-
-/*    microtcp_header_t header;
-
-    microtcp_recv(&socket, &header, sizeof(header), MSG_WAITALL);
-    printf("header recieved with sequence number : %d \n", header.seq_number);    
- */
