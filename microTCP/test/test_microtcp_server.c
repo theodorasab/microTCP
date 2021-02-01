@@ -36,6 +36,10 @@
 int main(int argc, char **argv)
 {
     int data;
+    int data1;
+    void *buf[1024];
+    char buffer[1024];
+    char array[10000];
     microtcp_header_t header;
     microtcp_sock_t socket;
     struct sockaddr_in servaddr, clientaddr;
@@ -57,17 +61,28 @@ int main(int argc, char **argv)
         exit(EXIT_FAILURE);
     }
     microtcp_accept(&socket, (struct sockaddr *)&clientaddr, sizeof(clientaddr));
+    int data_recv = 0, data_r = 0;
 
-    memset(&header, 0, sizeof(header));
-
-    while (data = microtcp_recv(&socket, &header, sizeof(header), MSG_WAITALL))
+    while (data1 = microtcp_recv(&socket, (char *)array, 10000, MSG_WAITALL))
     {
-        printf("RECEIVE: seq-> %d, ack->%d, control->%d\n", header.seq_number, header.ack_number, header.control);
+        //if (socket.state != DUP_ACK)
+        printf("data1 received :  %d\n", data1);
+
+        data_r += data1;
     }
-    printf("GETS FIN+ACK FOR SHUTDOWN\n\n");
-    printf("1st recv server: seq_num %d and ack_num %d\nWith control: %hu\n", header.seq_number, header.ack_number, header.control);
+    printf("data received :  %d\n", data_r);
 
     microtcp_shutdown(&socket, 1);
 
     return 0;
 }
+
+/*
+    while (data = microtcp_recv(&socket, (char *)buffer, 1024, MSG_WAITALL))
+    {
+        data_recv += data;
+        printf("data received :  %d\n", data_recv);
+        printf("Client's message: %s\n", buffer);
+    }
+    buffer[data_recv] = '\0';
+*/
