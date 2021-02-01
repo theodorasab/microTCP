@@ -32,11 +32,23 @@
 #include "../lib/microtcp.h"
 #define MAXLINE 1024
 
+void arrayOfChars(char *buf, int length, char a)
+{
+    for (int i = 0; i < length; i++)
+    {
+        buf[i] = a;
+    }
+    buf[length] = '\0';
+}
+
 int main(int argc, char **argv)
 {
-    microtcp_header_t header1, header2;
+    void *buffer[1024];
+    microtcp_header_t header1, header2, header3;
     microtcp_sock_t socket_cl;
     struct sockaddr_in clientaddr;
+    char array[10000];
+    char *hello = "Hello";
 
     socket_cl = microtcp_socket(AF_INET, SOCK_DGRAM, 0);
 
@@ -48,14 +60,11 @@ int main(int argc, char **argv)
 
     microtcp_connect(&socket_cl, (const struct sockaddr *)&clientaddr, sizeof(clientaddr));
 
-    memset(&header1, 0, sizeof(header1));
-    memset(&header2, 0, sizeof(header2));
+    arrayOfChars(array, 10000, 'a');
 
-    header1.control = 1; header1.seq_number = 130; header1.ack_number = 456;
-    header2.control = 4; header2.seq_number = 75; header2.ack_number = 112;
+    microtcp_send(&socket_cl, (const char *)array, 10000, 0);
 
-    microtcp_send(&socket_cl, &header1, sizeof(header1), 0);
-    microtcp_send(&socket_cl, &header2, sizeof(header2), 0);
+    printf("Message sent from client.\n");
 
     microtcp_shutdown(&socket_cl, 1);
 
@@ -63,3 +72,7 @@ int main(int argc, char **argv)
 
     return 0;
 }
+
+// microtcp_send(&socket_cl, (const char *)hello, 6, 0);
+// int m = microtcp_recv(&socket_cl, (char *)buffer, 1024, 0);
+// buffer[m] = '\0';
